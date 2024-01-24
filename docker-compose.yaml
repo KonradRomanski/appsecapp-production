@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  database:
+    image: 'mongo:latest'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGODB_DATABASE: ${MONGODB_DATABASE}
+    ports:
+      - "27017:27017"
+    container_name: appsec-database-container
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    env_file:
+      - ./.env
+
+  backend:
+    image: konrad848/appsecapp-backend:latest
+    ports:
+      - "3000:3000"
+    container_name: appsec-backend-container
+    depends_on:
+      - database
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - ./.env
+
+  frontend:
+    image: konrad848/appsecapp-frontend:latest
+    ports:
+      - "3001:3001"
+    container_name: appsec-frontend-container
+    environment:
+      - PORT=3001
